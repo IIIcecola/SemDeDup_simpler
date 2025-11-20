@@ -268,12 +268,26 @@ def deduplicate(
         sim_matrix = embs @ embs.T
         sim_matrix.fill_diagonal_(0.0)
         
-        max_sim = sim_matrix.max(dim=1)[0].cpu().numpy()
-        to_keep = max_sim <= (1 - eps)
+        # 关键修改：计算每个样本与组内其他样本的平均相似度（而非最大相似度）
+        avg_sim = sim_matrix.mean(dim=1).cpu().numpy()
         
+        # 逻辑调整：
+        # 1. 先保留平均相似度最低的样本（最不重复的核心样本）
+        core_idx = np.argmin(avg_sim)
+        to_keep = np.zeros(len(samples), dtype=bool)
+        to_keep[core_idx] = True  # 强制保留核心样本
+        
+        # 2. 再保留与核心样本相似度≤阈值的其他样本（非重复样本）
+        core_emb = embs[core_idx:core_idx+1]  # 核心样本嵌入
+        other_sims = (embs @ core_emb.T).squeeze(1).cpu().numpy()  # 其他样本与核心样本的相似度
+        non_dup_mask = other_sims <= (1 - eps)
+        to_keep = to_keep | non_dup_mask  # 合并：保留核心样本 + 非重复样本
+        
+        # 计算重复数
         duplicates_in_cluster = len(samples) - sum(to_keep)
         total_duplicates += duplicates_in_cluster
         
+        # 添加保留的索引
         for i, keep in enumerate(to_keep):
             if keep:
                 keep_indices.add(indices[i])
