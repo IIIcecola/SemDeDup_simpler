@@ -1,9 +1,12 @@
 # 简化版
 保留SemDeDup的思路，对图片/视频encode-聚类（cluster）-去重(dedup)-复制(copy2)
-图片encoder选择：openai/clip-vit-large-patch14
-视频encoder选择：alibaba-pai/VideoCLIP-XL
 
-舍弃SemDeDup复杂框架，直接实现。见脚本dedup.py
+
+- 图片encoder选择：openai/clip-vit-large-patch14
+- 视频encoder选择：alibaba-pai/VideoCLIP-XL
+
+
+**舍弃SemDeDup复杂框架，直接实现**。见脚本dedup.py
 
 # SemDeDup: Data-Efficient Learning at Web-scale through semantic deduplication
 
