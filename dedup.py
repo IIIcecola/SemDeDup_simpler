@@ -19,10 +19,6 @@ from datetime import datetime
 from typing import List, Tuple
 from transformers import CLIPProcessor, CLIPModel
 
-# -------------------------- 关键：添加模型路径到Python环境（确保能导入modeling和utils） --------------------------
-VIDEOCLIP_XL_LOCAL_DIR = "path/to/local/alibaba-pai/VideoCLIP-XL"
-sys.path.insert(0, VIDEOCLIP_XL_LOCAL_DIR)
-from modeling import VideoCLIP_XL
 
 # -------------------------- 配置参数 --------------------------
 class Config:
@@ -35,7 +31,7 @@ class Config:
         
         # 本地模型路径
         self.local_clip_image_model = "path/to/local/openai/clip-vit-large-patch14"  
-        self.local_video_clip_model = VIDEOCLIP_XL_LOCAL_DIR  
+        self.local_video_clip_model = "path/to/local/alibaba-pai/VideoCLIP-XL"  
         self.video_clip_weight_path = os.path.join(self.local_video_clip_model, "VideoCLIP-XL.bin") 
         
         # 模型配置（适配VideoCLIP-XL官方要求）
@@ -317,6 +313,8 @@ def process_media(
         emb_size = config.image_embedding_size
         batch_size = config.batch_size
     else:
+        sys.path.insert(0, config.local_video_clip_model)
+        from modeling import VideoCLIP_XL
         # 加载VideoCLIP-XL官方模型
         model = VideoCLIP_XL()
         # 加载本地权重（避免在线下载）
